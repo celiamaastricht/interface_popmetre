@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Connexion - Popmetre</title>
+</head>
+<body>
+    <h1>Connexion</h1>
+    {% if error %}
+        <p style="color:red;">{{ error }}</p>
+    {% endif %}
+    <form method="POST" action="{% url 'login' %}">
+        {% csrf_token %}
+        <label>Nom d'utilisateur:</label><br>
+        <input type="text" name="username" required><br><br>
+
+        <label>Mot de passe:</label><br>
+        <input type="password" name="password" required><br><br>
+
+        <button type="submit">Se connecter</button>
+    </form>
+</body>
+</html>

@@ -1,0 +1,77 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<h2>Upload CSV & Start Analysis</h2>
+
+<form id="uploadForm" method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <input type="file" id="csvFile" name="file" required>
+    <button type="submit">Envoyer</button>
+</form>
+
+<script>
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    const form = document.getElementById('uploadForm');
+    form.addEventListener('submit', function (event) {
+        event.preventDefault();
+
+        const fileInput = document.getElementById('csvFile');
+        const file = fileInput.files[0];
+
+        if (!file) {
+            alert('Veuillez sélectionner un fichier CSV.');
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append('file', file);
+
+        fetch('/upload_and_analyze/', {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-CSRFToken': getCookie('csrftoken'),
+            }
+        })
+        .then(response => {
+            if (!response.ok) {
+                return response.text().then(text => {
+                    throw new Error(`Erreur réseau : ${response.status} - ${text}`);
+                });
+            }
+            return response.blob();
+        })
+        .then(blob => {
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'analysis_report.pdf';
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+        })
+        .catch(error => {
+            alert('Erreur : ' + error.message);
+            console.error(error);
+        });
+    });
+});
+</script>
+{% endblock %}
