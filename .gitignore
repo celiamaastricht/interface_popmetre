@@ -17,3 +17,7 @@ venv/
 # Migrations
 **/migrations/
 !*/migrations/__init__.py
+
+# Clés SSH accidentellement ajoutées
+id_ed25519_new
+id_ed25519_new.pub
