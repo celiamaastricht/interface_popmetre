@@ -1,0 +1,153 @@
+/* ========== GLOBAL ========== */
+html, body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    font-family: 'Segoe UI', sans-serif;
+    color: #333;
+    overflow-x: hidden;
+}
+
+/* ========== BACKGROUND IMAGE ========== */
+body {
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    background-image: url('/static/img/femme_sourire.jpg');
+    background-size: cover;       /* image prend tout le fond */
+    background-repeat: no-repeat;
+    background-position: center;  /* centrée */
+    background-attachment: fixed;
+    min-height: 100vh;
+}
+
+/* ========== LOGO ========== */
+.logo {
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    height: 160px;  /* agrandi */
+    z-index: 1000;
+}
+
+
+/* ============================= */
+/* STYLES POUR LE BLOC D’ACCUEIL */
+/* ============================= */
+.header-center {
+    position: relative;
+    z-index: 5;                             /* devant le fond */
+    max-width: 500px;
+    width: 90%;
+    margin: 3rem auto;                      /* centré et espacé */
+    padding: 2rem;                          /* marge intérieure */
+    background-color: rgba(255, 255, 255, 0.95);
+    border-radius: 1rem;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    text-align: center;                     /* titre + bouton centrés */
+}
+
+.header-center h1 {
+    margin-bottom: 3rem;                    /* espace sous le titre */
+}
+
+.header-center .btn-primary {
+    margin-top: 0;                          /* supprime marge si déjà définie */
+}
+
+
+.header-center .btn-primary {
+    margin-top: 1rem;                       /* espacement sous le titre */
+}
+
+
+/* ========== FORM CONTAINER ========== */
+.form-container {
+    position: relative;
+    z-index: 5;
+    max-width: 500px;
+    width: 90%;
+    padding: 2rem;
+    background-color: rgba(255, 255, 255, 0.95);
+    border-radius: 1rem;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+
+    margin: 0 auto; /* centre le formulaire */
+    text-align: left; /* contenu aligné à gauche */
+}
+
+/* Labels alignés à gauche */
+.form-container label {
+    display: block;
+    margin-bottom: 0.3rem;
+    font-weight: 600;
+}
+
+/* ========== INPUTS ========== */
+.form-container input[type="file"],
+.form-container input[type="text"],
+.form-container input[type="password"] {
+    width: 100%;
+    padding: 0.75rem;
+    margin-bottom: 1rem;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    font-size: 1rem;
+}
+
+.form-container button {
+    width: 100%;
+}
+
+/* ========== BUTTON ========== */
+.btn-primary {
+    padding: 0.75rem 1.5rem;
+    background-color: #ff8c00;
+    color: white;
+    border: none;
+    border-radius: 40px;
+    font-size: 1rem;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.btn-primary:hover {
+    background-color: #e67e00;
+}
+
+/* ========== LOGIN TITLE CENTERING ========== */
+.login-title {
+    text-align: center;
+    margin-bottom: 1.5rem; /* un peu d’espace sous le titre */
+    font-size: 2rem;   
+}
+
+
+/* ========== UPLOAD PAGE TITLE STYLING ========== */
+.upload-title {
+    text-align: center;
+    margin-bottom: 2rem; /* espace sous le titre */
+    font-size: 2rem;      
+}
+
+/* ========== RESPONSIVE ========== */
+@media (max-width: 768px) {
+    body {
+        background-position: center center;
+        background-size: cover;
+    }
+
+    .logo {
+        height: 90px;
+        top: 10px;
+        left: 10px;
+    }
+
+    .form-container {
+        padding: 1.5rem;
+        margin: 1rem;
+    }
+}

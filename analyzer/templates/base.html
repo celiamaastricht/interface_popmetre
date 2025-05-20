@@ -1,23 +1,15 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
     <title>Analyse de CSV</title>
-    <style>
-        body {
-            font-family: sans-serif;
-            margin: 2rem;
-            background-color: #f8f9fa;
-        }
-        h2 {
-            color: #333;
-        }
-        form {
-            margin-top: 1rem;
-        }
-    </style>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
 </head>
 <body>
+    <!-- Logo bien positionné -->
+    <img src="{% static 'img/logo.png' %}" alt="Logo Popmètre" class="logo">
+
     {% block content %}
     {% endblock %}
 </body>

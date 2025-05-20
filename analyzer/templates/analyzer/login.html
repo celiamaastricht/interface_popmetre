@@ -1,22 +1,21 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Connexion - Popmetre</title>
-</head>
-<body>
-    <h1>Connexion</h1>
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="form-container">
+    <h2 class="login-title">Connexion</h2>  <!-- Ajout de la classe -->
     {% if error %}
-        <p style="color:red;">{{ error }}</p>
+        <p class="error">{{ error }}</p>
     {% endif %}
     <form method="POST" action="{% url 'login' %}">
         {% csrf_token %}
-        <label>Nom d'utilisateur:</label><br>
-        <input type="text" name="username" required><br><br>
+        <label>Nom d'utilisateur:</label>
+        <input type="text" name="username" required>
 
-        <label>Mot de passe:</label><br>
-        <input type="password" name="password" required><br><br>
+        <label>Mot de passe:</label>
+        <input type="password" name="password" required>
 
-        <button type="submit">Se connecter</button>
+        <button type="submit" class="btn-primary">Connexion</button>
     </form>
-</body>
-</html>
+</div>
+{% endblock %}

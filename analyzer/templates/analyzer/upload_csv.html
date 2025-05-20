@@ -2,14 +2,18 @@
 {% load static %}
 
 {% block content %}
-<h2>Upload CSV & Start Analysis</h2>
+<div class="form-container">
+    <h2 class="upload-title">Analyse de votre fichier patient</h2>
+    <p>Importez un fichier CSV pour générer automatiquement un rapport PDF complet contenant l’analyse de tous les biomarqueurs mesurés chez le patient.</p>
+    <p>Ce document vous donnera une synthèse claire et exploitable des données récoltées.</p>
 
-<form id="uploadForm" method="post" enctype="multipart/form-data">
-    {% csrf_token %}
-    {{ form.as_p }}
-    <input type="file" id="csvFile" name="file" required>
-    <button type="submit">Envoyer</button>
-</form>
+    <form id="uploadForm" method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <input type="file" id="csvFile" name="file" required>
+        <button type="submit" class="btn-primary">Analyser</button>
+    </form>
+</div>
 
 <script>
 function getCookie(name) {
@@ -43,6 +47,10 @@ document.addEventListener('DOMContentLoaded', () => {
         const formData = new FormData();
         formData.append('file', file);
 
+        const submitButton = form.querySelector('button[type="submit"]');
+        submitButton.disabled = true;
+        submitButton.textContent = 'Analyse en cours...';
+
         fetch('/upload_and_analyze/', {
             method: 'POST',
             body: formData,
@@ -66,10 +74,16 @@ document.addEventListener('DOMContentLoaded', () => {
             document.body.appendChild(a);
             a.click();
             a.remove();
+
+            fileInput.value = "";
+            submitButton.disabled = false;
+            submitButton.textContent = 'Analyser';
         })
         .catch(error => {
             alert('Erreur : ' + error.message);
             console.error(error);
+            submitButton.disabled = false;
+            submitButton.textContent = 'Analyser';
         });
     });
 });
