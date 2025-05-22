@@ -7,8 +7,10 @@
     <link rel="stylesheet" href="{% static 'css/style.css' %}">
 </head>
 <body>
-    <!-- Logo bien positionné -->
-    <img src="{% static 'img/logo.png' %}" alt="Logo Popmètre" class="logo">
+    <!-- Logo CLIQUABLE vers home -->
+    <a href="{% url 'home' %}">
+        <img src="{% static 'img/logo.png' %}" alt="Logo Popmètre" class="logo">
+    </a>
 
     {% block content %}
     {% endblock %}
