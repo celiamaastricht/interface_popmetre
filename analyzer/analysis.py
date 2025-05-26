@@ -8,6 +8,12 @@ import tempfile
 import matplotlib
 matplotlib.use('Agg')
 import unicodedata
+from datetime import datetime
+from django.utils.text import slugify  # ✅ Pour nom de fichier
+
+# ✅ Créer le dossier automatiquement si nécessaire
+PDF_OUTPUT_DIR = os.path.join(os.path.dirname(__file__), 'pdf_generated_popmetre')
+os.makedirs(PDF_OUTPUT_DIR, exist_ok=True)
 
 def clean_text(text):
     replacements = {
@@ -43,6 +49,11 @@ def format_time(time_str):
     except:
         return str(time_str)
 
+def add_generation_datetime(pdf, timestamp_str):
+    pdf.set_font("Arial", 'I', 10)
+    pdf.set_xy(150, 10)
+    pdf.cell(0, 10, timestamp_str, ln=0, align='R')
+
 variable_labels = {
     "AGE": "Âge",
     "HEIGHT": "Taille (cm)",
@@ -70,7 +81,7 @@ variable_labels = {
     "TIME": "Heure"
 }
 
-def analyze_csv_and_generate_pdf(patient_csv_path, population_csv_path, output_pdf_path):
+def analyze_csv_and_generate_pdf(patient_csv_path, population_csv_path):
     patient_name = extract_patient_name(patient_csv_path)
 
     df = pd.read_csv(population_csv_path, encoding='utf-8-sig')
@@ -89,12 +100,10 @@ def analyze_csv_and_generate_pdf(patient_csv_path, population_csv_path, output_p
         if line.startswith("#"):
             try:
                 content = line.strip("#\n").strip()
-                # Trouve la dernière valeur numérique (qui est la valeur réelle)
                 match = re.match(r"(.+?)\s+([\d\.,]+)$", content)
                 if match:
                     raw_key = match.group(1).strip()
                     value = match.group(2).replace(",", ".")
-                    # Nettoyage clé : MAJUSCULES + underscore
                     key = re.sub(r"[^\w]+", "_", raw_key.upper()).strip("_")
                     individual_data[key] = value
             except Exception as e:
@@ -102,7 +111,6 @@ def analyze_csv_and_generate_pdf(patient_csv_path, population_csv_path, output_p
 
     individual = pd.Series(individual_data)
     individual.index = individual.index.str.strip().str.upper()
-
     for col in individual.index:
         try:
             individual[col] = float(individual[col])
@@ -112,6 +120,9 @@ def analyze_csv_and_generate_pdf(patient_csv_path, population_csv_path, output_p
     pdf = FPDF()
     pdf.set_auto_page_break(auto=True, margin=15)
     pdf.add_page()
+
+    timestamp_str = datetime.now().strftime("PDF généré : %d/%m/%Y à %H:%M")
+    add_generation_datetime(pdf, timestamp_str)
 
     logo_path = os.path.join(os.path.dirname(__file__), 'static', 'img', 'logo.png')
     if os.path.isfile(logo_path):
@@ -138,13 +149,10 @@ def analyze_csv_and_generate_pdf(patient_csv_path, population_csv_path, output_p
     temp_dir = tempfile.mkdtemp()
 
     for col in df.columns:
-        print(f"Traitement de la colonne : {col}")
-
         if col in individual and pd.notna(individual[col]) and col in stats.index:
             try:
                 val_float = float(individual[col])
-            except Exception as e:
-                print(f"Conversion impossible pour {col} : {e}")
+            except:
                 continue
 
             mean = stats.loc[col, "mean"]
@@ -156,7 +164,6 @@ def analyze_csv_and_generate_pdf(patient_csv_path, population_csv_path, output_p
             label = variable_labels.get(col, col)
             img_path = os.path.join(temp_dir, f"{col}.png")
 
-            # Histogramme
             plt.figure(figsize=(6, 3))
             sns.histplot(df[col].dropna(), bins=25, color='skyblue', kde=False)
             plt.axvline(val_float, color='red', linestyle='--', label=f'Patient ({val_float:.2f})')
@@ -167,10 +174,6 @@ def analyze_csv_and_generate_pdf(patient_csv_path, population_csv_path, output_p
             plt.tight_layout()
             plt.savefig(img_path, dpi=100)
             plt.close()
-
-            if not os.path.isfile(img_path):
-                print(f"Image non générée pour {col}")
-                continue
 
             pdf.add_page()
             pdf.set_font("Arial", 'B', 14)
@@ -184,11 +187,9 @@ def analyze_csv_and_generate_pdf(patient_csv_path, population_csv_path, output_p
 
             explication = (
                 "Définition de l’écart type :\n"
-                "L’écart type mesure la dispersion des données autour de la moyenne. "
-                "Plus il est grand, plus les valeurs sont éparpillées.\n\n"
+                "L’écart type sert à mesurer si les données sont regroupées ou dispersées autour de la moyenne.\n\n"
                 "Définition du Z-score :\n"
-                "Le z-score mesure l'écart d'une valeur par rapport à la moyenne en nombre d'écarts types. "
-                "Z > 0 : au-dessus de la moyenne, Z < 0 : en dessous."
+                "Le z-score indique à quel point une valeur est éloignée de la moyenne, en nombre d’écarts types."
             )
             pdf.set_font("Arial", 'I', 10)
             pdf.multi_cell(0, 6, clean_text(explication))
@@ -196,17 +197,16 @@ def analyze_csv_and_generate_pdf(patient_csv_path, population_csv_path, output_p
 
             try:
                 pdf.image(img_path, x=15, y=pdf.get_y(), w=180, h=90)
-                print(f"Image ajoutée : {img_path}")
-            except Exception as e:
-                print(f"Erreur d'ajout image {col} : {e}")
-        else:
-            print(f"Colonne ignorée : {col}")
-
-    pdf.output(output_pdf_path)
+            except:
+                continue
 
     for f in os.listdir(temp_dir):
         os.remove(os.path.join(temp_dir, f))
     os.rmdir(temp_dir)
 
+    pdf_filename = f"rapport_{slugify(patient_name)}.pdf"
+    output_pdf_path = os.path.join(PDF_OUTPUT_DIR, pdf_filename)
+    pdf.output(output_pdf_path)
+
     print(f"Rapport généré dans : {output_pdf_path}")
-    return patient_name
+    return patient_name, output_pdf_path

@@ -71,19 +71,16 @@ class UploadAndAnalyzeCSV(APIView):
 
         population_csv_path = r"C:\Users\celia\OneDrive\Documents\Axelife\Projet\metadata_all_patients.csv"
 
-        with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as temp_pdf:
-            temp_pdf_path = temp_pdf.name
+        # ✅ Analyse et PDF généré automatiquement dans pdf_generated_popmetre
+        patient_name, pdf_path = analyze_csv_and_generate_pdf(temp_csv_path, population_csv_path)
 
-        # Appelle l'analyse et récupère le nom du patient
-        patient_name = analyze_csv_and_generate_pdf(temp_csv_path, population_csv_path, temp_pdf_path)
         safe_name = slugify_custom(patient_name) or "patient"
-
         pdf_filename = f"analysis_report_{safe_name}.pdf"
 
         response = FileResponse(
-            open(temp_pdf_path, 'rb'),
+            open(pdf_path, 'rb'),
             content_type='application/pdf'
         )
         response['Content-Disposition'] = f'attachment; filename="{quote(pdf_filename)}"'
-        response['X-Filename'] = quote(pdf_filename)  # Pour JavaScript
+        response['X-Filename'] = quote(pdf_filename)
         return response
