@@ -4,7 +4,18 @@
 <head>
     <meta charset="UTF-8">
     <title>Analyse de CSV</title>
+
+    <!-- CSS principal -->
     <link rel="stylesheet" href="{% static 'css/style.css' %}">
+
+    <!-- Bloc pour CSS supplémentaires -->
+    {% block extra_css %}{% endblock %}
+
+    <style>
+        a, button, .btn {
+            text-decoration: none !important;
+        }
+    </style>
 </head>
 <body>
     <!-- Logo CLIQUABLE vers home -->

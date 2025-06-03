@@ -1,16 +1,22 @@
 {% extends 'base.html' %}
 {% block content %}
 
-<div class="form-container">
-    <h2 class="login-title">Connexion</h2>
+<div class="form-container" style="max-width: 500px;">
+    <h2 class="login-title">Créer un compte</h2>
 
     <form method="post">
         {% csrf_token %}
         <label for="username">Nom d'utilisateur :</label>
         <input type="text" name="username" required>
 
+        <label for="email">Email :</label>
+        <input type="email" name="email" required>
+
         <label for="password">Mot de passe :</label>
         <input type="password" name="password" required>
+
+        <label for="password2">Confirmer le mot de passe :</label>
+        <input type="password" name="password2" required>
 
         {% if messages %}
             {% for message in messages %}
@@ -20,11 +26,11 @@
             {% endfor %}
         {% endif %}
 
-        <button type="submit" class="btn-primary">Se connecter</button>
+        <button type="submit" class="btn-primary">Créer un compte</button>
     </form>
 
     <div class="register-link" style="text-align: center; margin-top: 1rem;">
-        Pas encore de compte ? <a href="{% url 'register' %}" style="color:#d35400; font-weight: bold;">Créer un compte</a>
+        Vous avez déjà un compte ? <a href="{% url 'login' %}" style="color:#d35400; font-weight: bold;">Se connecter</a>
     </div>
 </div>
 

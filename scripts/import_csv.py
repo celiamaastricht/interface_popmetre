@@ -1,3 +1,15 @@
+import os
+import sys
+
+# Ajoute le chemin racine du projet au PYTHONPATH
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+# Configure Django
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'popmetre_interface.settings')
+
+import django
+django.setup()
+
 import pandas as pd
 from django.db import connection
 import os
