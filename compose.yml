@@ -20,7 +20,7 @@ services:
     depends_on:
       - db
     environment:
-      DJANGO_SECRET_KEY: macle
+      DJANGO_SECRET_KEY: 6pfc7r^344*yo%rx0sz0glpubce1uj4m8&&)+v+suk7
       DEBUG: ${DEBUG}
       DJANGO_LOGLEVEL: ${DJANGO_LOGLEVEL}
       DJANGO_ALLOWED_HOSTS: ${DJANGO_ALLOWED_HOSTS}
@@ -34,6 +34,7 @@ services:
       - .env
     volumes:
       - .:/app    # Monte tout le projet local dans /app du container
+      - ./media:/app/media 
     command: >
       sh -c "python manage.py migrate &&
              python manage.py collectstatic --noinput &&

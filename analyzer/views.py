@@ -17,10 +17,10 @@ import re
 import os
 from django.conf import settings
 from .analysis import analyze_csv_and_generate_pdf
-from django.contrib import messages
-from django.contrib.admin.views.decorators import staff_member_required
-from django.contrib.auth.models import User
-from django.shortcuts import render, redirect
+from .models import Report
+import shutil
+from analyzer.models import Mesure
+from django.core.files import File
 
 # Page d'accueil
 def home_view(request):
@@ -221,6 +221,8 @@ def slugify_custom(value):
 
 
 # API REST complète (CSV patient → PDF)
+
+
 class UploadAndAnalyzeCSV(APIView):
     parser_classes = (MultiPartParser, FormParser)
 
@@ -234,17 +236,45 @@ class UploadAndAnalyzeCSV(APIView):
                 temp_csv.write(chunk)
             temp_csv_path = temp_csv.name
 
-        population_csv_path = os.path.join(settings.BASE_DIR, 'data', 'metadata_all_patients.csv')
+        try:
+            population_csv_path = os.path.join(settings.BASE_DIR, 'data', 'metadata_all_patients.csv')
 
-        patient_name, pdf_path = analyze_csv_and_generate_pdf(temp_csv_path, population_csv_path)
+            patient_name, pdf_path = analyze_csv_and_generate_pdf(temp_csv_path, population_csv_path)
 
-        safe_name = slugify_custom(patient_name) or "patient"
-        pdf_filename = f"analysis_report_{safe_name}.pdf"
+            safe_name = slugify_custom(patient_name) or "patient"
+            pdf_filename = f"analysis_report_{safe_name}.pdf"
 
-        response = FileResponse(
-            open(pdf_path, 'rb'),
-            content_type='application/pdf'
-        )
-        response['Content-Disposition'] = f'attachment; filename="{quote(pdf_filename)}"'
-        response['X-Filename'] = quote(pdf_filename)
-        return response
+            # Destination dans MEDIA_ROOT/reports_pdfs
+            destination_dir = os.path.join(settings.MEDIA_ROOT, 'reports_pdfs')
+            os.makedirs(destination_dir, exist_ok=True)
+            destination_path = os.path.join(destination_dir, pdf_filename)
+            shutil.copy(pdf_path, destination_path)
+
+            # ✅ Crée l'objet Report
+            report = Report(
+                user=request.user,
+                patient_name=patient_name,
+                csv_filename=file_obj.name,
+            )
+
+            # ✅ Sauvegarde réelle via File()
+            with open(destination_path, 'rb') as f:
+                report.pdf_file.save(f'reports_pdfs/{pdf_filename}', File(f), save=True)
+
+            # ✅ PDF bien géré par Django maintenant
+            response = FileResponse(open(destination_path, 'rb'), content_type='application/pdf')
+            response['Content-Disposition'] = f'attachment; filename="{quote(pdf_filename)}"'
+            response['X-Filename'] = quote(pdf_filename)
+            return response
+
+        finally:
+            if os.path.exists(temp_csv_path):
+                os.remove(temp_csv_path)
+
+
+
+@staff_member_required
+def analysis_history_view(request):
+    reports = Report.objects.select_related('user').order_by('-created_at')
+    return render(request, 'analyzer/analysis_history.html', {'reports': reports})
+

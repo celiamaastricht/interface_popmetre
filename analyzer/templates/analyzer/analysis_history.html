@@ -1,0 +1,95 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/user_list.css' %}">
+<style>
+  .analysis-table th, .analysis-table td {
+    word-break: break-word;
+  }
+  .filter-input {
+    margin-bottom: 1rem;
+    padding: 8px 12px;
+    width: 100%;
+    max-width: 300px;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+  }
+  /* Bouton download plus petit et orange, arrondi */
+  .btn-download {
+    padding: 6px 12px;
+    font-weight: bold;
+    cursor: pointer;
+    background-color: #F87C56;
+    border: none;
+    color: white;
+    border-radius: 25px;
+    font-size: 0.9rem;
+    text-decoration: none;
+    display: inline-block;
+    transition: background-color 0.3s ease;
+  }
+  .btn-download:hover {
+    background-color: #F87C56;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="form-container">
+  <h2 class="upload-title">Historique des analyses</h2>
+
+  <input type="text" id="filterInput" class="filter-input" placeholder="Filtrer par utilisateur ou fichier..." onkeyup="filterTable()">
+
+  <div class="table-wrapper">
+    <table class="user-table analysis-table">
+      <thead>
+        <tr>
+          <th>N° Requête</th>
+          <th>Utilisateur</th>
+          <th>Fichier CSV</th>
+          <th>Date d’analyse</th>
+          <th>PDF généré</th>
+        </tr>
+      </thead>
+      <tbody id="tableBody">
+        {% for report in reports %}
+        <tr>
+          <td>{{ report.id }}</td>
+          <td>{{ report.user.username }}</td>
+          <td>{{ report.csv_filename }}</td>
+          <td>{{ report.created_at|date:"H:i d/m/Y" }}</td>
+          <td>
+            <a href="{{ report.pdf_file.url }}" target="_blank" class="btn-download" download>
+              Télécharger PDF
+            </a>
+          </td>
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="5" style="text-align:center;">Aucune analyse trouvée.</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<script>
+function filterTable() {
+  const input = document.getElementById("filterInput").value.toLowerCase();
+  const rows = document.getElementById("tableBody").getElementsByTagName("tr");
+
+  for (let row of rows) {
+    let userCell = row.cells[1].textContent.toLowerCase(); // colonne utilisateur déplacée en 2ème (index 1)
+    let fileCell = row.cells[2].textContent.toLowerCase(); // colonne fichier CSV maintenant index 2
+
+    if (userCell.includes(input) || fileCell.includes(input)) {
+      row.style.display = "";
+    } else {
+      row.style.display = "none";
+    }
+  }
+}
+</script>
+{% endblock %}

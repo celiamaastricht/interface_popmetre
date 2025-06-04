@@ -6,10 +6,14 @@ import matplotlib.pyplot as plt
 from fpdf import FPDF
 import tempfile
 import matplotlib
-matplotlib.use('Agg')
+matplotlib.use('Agg')  # backend non graphique, adapté pour serveurs/Docker
+import matplotlib.pyplot as plt
 import unicodedata
 from datetime import datetime
 from django.utils.text import slugify  # ✅ Pour nom de fichier
+from django.conf import settings
+
+
 
 # ✅ Créer le dossier automatiquement si nécessaire
 PDF_OUTPUT_DIR = os.path.join(os.path.dirname(__file__), 'pdf_generated_popmetre')
@@ -124,7 +128,12 @@ def analyze_csv_and_generate_pdf(patient_csv_path, population_csv_path):
     timestamp_str = datetime.now().strftime("PDF généré : %d/%m/%Y à %H:%M")
     add_generation_datetime(pdf, timestamp_str)
 
-    logo_path = os.path.join(os.path.dirname(__file__), 'static', 'img', 'logo.png')
+ 
+    logo_path = os.path.join(settings.BASE_DIR, 'analyzer', 'static', 'img', 'logo.png')
+
+    if not os.path.exists(logo_path):
+        raise FileNotFoundError(f"Logo introuvable à : {logo_path}")
+
     if os.path.isfile(logo_path):
         pdf.image(logo_path, x=10, y=8, w=75)
 

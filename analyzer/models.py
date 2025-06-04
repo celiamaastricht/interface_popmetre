@@ -1,4 +1,5 @@
 from django.db import models
+from django.contrib.auth.models import User
 
 
 class Mesure(models.Model):
@@ -32,3 +33,16 @@ class Mesure(models.Model):
 
     def __str__(self):
         return f"{self.patient} ({self.date})"
+    
+
+class Report(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='reports')
+    patient_name = models.CharField(max_length=255)
+    csv_filename = models.CharField(max_length=255)
+    pdf_file = models.FileField(upload_to='reports_pdfs/')  # chemin dans MEDIA_ROOT
+    created_at = models.DateTimeField(auto_now_add=True)
+    downloaded_at = models.DateTimeField(null=True, blank=True)
+
+
+    def __str__(self):
+        return f"{self.patient_name} - {self.csv_filename}"

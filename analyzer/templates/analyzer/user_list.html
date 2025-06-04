@@ -3,17 +3,30 @@
 
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'css/user_list.css' %}">
+<style>
+  .filter-input {
+    margin-bottom: 1rem;
+    padding: 8px 12px;
+    width: 100%;
+    max-width: 300px;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+  }
+</style>
 {% endblock %}
 
 {% block content %}
 <div class="form-container">
     <h2 class="upload-title">Liste des utilisateurs</h2>
 
+    <!-- Champ filtre -->
+    <input type="text" id="filterInput" class="filter-input" placeholder="Filtrer par utilisateur ou email..." onkeyup="filterTable()">
+
     <form method="post">
         {% csrf_token %}
 
         <div class="table-wrapper">
-            <table class="user-table">
+            <table class="user-table" id="userTable">
                 <thead>
                     <tr>
                         <th>Nom d'utilisateur</th>
@@ -24,7 +37,7 @@
                         <th>Supprimer</th>
                     </tr>
                 </thead>
-                <tbody>
+                <tbody id="tableBody">
                     {% for user in users %}
                     <tr>
                         <td>{{ user.username }}</td>
@@ -59,7 +72,7 @@
 
         {% if messages %}
             {% for message in messages %}
-                <div class="message {{ message.tags }}">
+                <div class="message {{ message.tags }} centered-message">
                     {{ message }}
                 </div>
             {% endfor %}
@@ -98,6 +111,23 @@
 
     function hideModal() {
         document.getElementById("confirmModal").style.display = "none";
+    }
+
+    // Fonction de filtrage
+    function filterTable() {
+        const input = document.getElementById("filterInput").value.toLowerCase();
+        const rows = document.getElementById("tableBody").getElementsByTagName("tr");
+
+        for (let row of rows) {
+            let usernameCell = row.cells[0].textContent.toLowerCase(); // Nom d'utilisateur
+            let emailCell = row.cells[1].textContent.toLowerCase();    // Email
+
+            if (usernameCell.includes(input) || emailCell.includes(input)) {
+                row.style.display = "";
+            } else {
+                row.style.display = "none";
+            }
+        }
     }
 </script>
 {% endblock %}
